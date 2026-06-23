@@ -159,10 +159,10 @@ function coverOnError(img) {
   });
 }
 
-/* ---------- 视频链接规范化（alist 网页路径 → 直链）----------
-   alist 的网页路径返回 HTML，无法直接播放。
+/* ---------- 视频链接规范化（OpenList 网页路径 → 直链）----------
+   OpenList 的网页路径返回 HTML，无法直接播放。
    直链规则：在域名根路径后插入 /d
-   例：https://alist.xxx.com/云盘/视频.mp4 → https://alist.xxx.com/d/云盘/视频.mp4
+   例：https://openlist.example.com/云盘/视频.mp4 → https://openlist.example.com/d/云盘/视频.mp4
    已是直链（/d/）或本地路径则不处理。 */
 function normalizeVideoUrl(url) {
   if (!url || typeof url !== 'string') return url;
@@ -179,7 +179,7 @@ function normalizeVideoUrl(url) {
   if (u.pathname.startsWith('/d/') || u.pathname === '/d' || u.pathname.startsWith('/api/')) {
     return trimmed;
   }
-  // 路径以视频扩展名结尾，疑似 alist 网页路径 → 转直链
+  // 路径以视频扩展名结尾，疑似 OpenList 网页路径 → 转直链
   if (/\.(mp4|m4v|webm|mov|mkv|m3u8|ts)(\?|$|#)/i.test(u.pathname)) {
     u.pathname = '/d' + u.pathname;
     return u.toString();

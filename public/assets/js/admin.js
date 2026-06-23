@@ -646,7 +646,7 @@ function openModal(video, allVideos) {
         <div class="form-group">
           <label class="form-label">OpenList 目录访问密码</label>
           <input class="form-input" name="alist_password" value="" placeholder="${isEdit && v.has_password ? '已保存，留空保持不变，输入新值则覆盖' : '目录设了密码才填（可留空）'}" maxlength="200" />
-          <div class="form-hint">仅当 OpenList 目录设了访问密码时填写。普通视频直链不需要此项；需要账号登录的 OpenList 资源请配 ALIST_TOKEN 环境变量。</div>
+          <div class="form-hint">仅当 OpenList 目录设了访问密码时填写。普通视频直链不需要此项；需要账号登录的 OpenList 资源请在部署环境中配置 token。</div>
         </div>
         <div class="form-group" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
           <div>
@@ -724,7 +724,7 @@ function openModal(video, allVideos) {
       series: fd.get('series'),
       episode: Number(fd.get('episode')) || 0,
     };
-    /* 编辑模式下，alist_password 留空表示不修改；新建时才提交空值 */
+    /* 编辑模式下，OpenList 目录密码留空表示不修改；新建时才提交空值 */
     const alistPwd = fd.get('alist_password');
     if (!isEdit || alistPwd) {
       data.alist_password = alistPwd;

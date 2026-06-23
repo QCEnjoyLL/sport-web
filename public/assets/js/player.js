@@ -59,8 +59,7 @@
     desc.style.display = '';
   }
 
-  /* 设置视频源：通过后端代理 /api/play/:id 实时解析 alist 直链
-     好处：1) 自动处理 alist 网页路径→直链 2) raw_url 过期自动刷新 3) 前端无需关心 alist 细节 */
+  /* 设置视频源：通过后端代理 /api/play/:id 处理 OpenList 签名刷新或普通视频直链跳转 */
   video.poster = videoData.cover || Pulse.DEFAULT_COVER;
   video.src = `/api/play/${id}`;
 

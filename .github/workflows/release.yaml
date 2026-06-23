@@ -47,11 +47,10 @@ jobs:
             echo "GIT_TAG=${GITHUB_REF_NAME}" >> "$GITHUB_ENV"
           fi
 
-      - name: Create source archives
+      - name: Create source archive
         run: |
           mkdir -p dist
           git archive --format=zip --prefix="sport-web-${GIT_TAG}/" --output="dist/sport-web-${GIT_TAG}.zip" HEAD
-          git archive --format=tar --prefix="sport-web-${GIT_TAG}/" HEAD | gzip -9 > "dist/sport-web-${GIT_TAG}.tar.gz"
           ls -lh dist
 
       - name: Upload dry-run artifacts
@@ -68,6 +67,6 @@ jobs:
         with:
           tag_name: ${{ env.GIT_TAG }}
           name: ${{ env.GIT_TAG }}
-          files: dist/*
+          files: dist/*.zip
           generate_release_notes: true
           prerelease: ${{ contains(env.GIT_TAG, 'rc') || contains(env.GIT_TAG, 'beta') || contains(env.GIT_TAG, 'alpha') }}

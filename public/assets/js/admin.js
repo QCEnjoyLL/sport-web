@@ -192,7 +192,7 @@
       <div class="admin-row ${batchMode ? 'batch-mode' : ''} ${selectedIds.has(v.id) ? 'selected' : ''}" data-id="${v.id}">
         ${checkboxHtml}
         <div class="admin-row-thumb">
-          <img src="${Pulse.escapeHtml(v.cover || Pulse.DEFAULT_COVER)}" alt="${Pulse.escapeHtml(v.title)}" data-fallback="1" />
+          <img src="${Pulse.escapeHtml(Pulse.getVideoCover(v))}" alt="${Pulse.escapeHtml(v.title)}" data-fallback="1" />
         </div>
         <div class="admin-row-info">
           <div class="admin-row-title">${Pulse.escapeHtml(v.title)}</div>

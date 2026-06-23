@@ -150,6 +150,10 @@ function getQueryParam(name) {
 /* ---------- 默认封面回退 ---------- */
 const DEFAULT_COVER = '/assets/img/default-cover.svg';
 
+function getVideoCover(video) {
+  return safeUrl(video?.cover) || safeUrl(video?.series_cover) || DEFAULT_COVER;
+}
+
 function coverOnError(img) {
   img.addEventListener('error', function handler() {
     if (img.src !== DEFAULT_COVER && !img.src.endsWith('default-cover.svg')) {
@@ -208,7 +212,7 @@ function safeUrl(url) {
 
 /* ---------- 共享视频卡片模板 ---------- */
 function renderVideoCard(v, inSeries) {
-  const cover = safeUrl(v.cover) || DEFAULT_COVER;
+  const cover = getVideoCover(v);
   const hasProgress = v.last_watched_at && (v.last_progress || 0) > 0 && !v.completed;
   const pct = hasProgress && v.duration ? Math.min(100, Math.round((v.last_progress / v.duration) * 100)) : 0;
   const episodeBadge = inSeries && v.episode ? `<div class="video-episode-badge">第${v.episode}集</div>` : '';
@@ -247,6 +251,7 @@ window.Pulse = {
   safeUrl,
   getQueryParam,
   coverOnError,
+  getVideoCover,
   normalizeVideoUrl,
   renderVideoCard,
   DEFAULT_COVER,

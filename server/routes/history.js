@@ -93,9 +93,13 @@ history.get('/', async (c) => {
   const db = c.env.DB;
   const rows = await db
     .prepare(
-      `SELECT h.*, v.title AS video_title, v.cover AS video_cover, v.duration AS video_duration
+      `SELECT h.*,
+              v.title AS video_title,
+              COALESCE(NULLIF(v.cover, ''), NULLIF(s.cover, '')) AS video_cover,
+              v.duration AS video_duration
        FROM watch_history h
        JOIN videos v ON v.id = h.video_id
+       LEFT JOIN series s ON s.name = v.series
        WHERE h.started_at >= ?
        ORDER BY h.started_at DESC
        LIMIT ?`

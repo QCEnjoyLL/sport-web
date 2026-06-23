@@ -60,7 +60,7 @@
   }
 
   /* 设置视频源：通过后端代理 /api/play/:id 处理 OpenList 签名刷新或普通视频直链跳转 */
-  video.poster = videoData.cover || Pulse.DEFAULT_COVER;
+  video.poster = Pulse.getVideoCover(videoData);
   video.src = `/api/play/${id}`;
 
   /* 续看提示 */
@@ -229,7 +229,7 @@
     if (!v) {
       return `<div class="nav-card ${dir} disabled"><div style="flex:1"></div><div class="nav-card-text"><div class="nav-card-label">${label}</div><div class="nav-card-title" style="color:var(--text-dim)">没有了</div></div></div>`;
     }
-    const cover = v.cover || Pulse.DEFAULT_COVER;
+    const cover = Pulse.getVideoCover(v);
     const thumb = `<div class="nav-card-thumb"><img src="${Pulse.escapeHtml(cover)}" data-fallback="1" /></div>`;
     const text = `<div class="nav-card-text"><div class="nav-card-label">${label}</div><div class="nav-card-title">${Pulse.escapeHtml(v.title)}</div></div>`;
     if (dir === 'prev') {
@@ -264,7 +264,7 @@
     list.innerHTML = seriesVideos
       .map((v) => {
         const isActive = v.id === videoData.id;
-        const cover = v.cover || Pulse.DEFAULT_COVER;
+        const cover = Pulse.getVideoCover(v);
         const pct = v.duration > 0 && v.last_progress ? Math.min(100, Math.round((v.last_progress / v.duration) * 100)) : 0;
         const done = v.completed;
         return `

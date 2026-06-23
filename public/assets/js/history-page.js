@@ -313,7 +313,7 @@
 
         const itemsHtml = grp.items
           .map((h) => {
-            const cover = h.video_cover || Pulse.DEFAULT_COVER;
+            const cover = Pulse.safeUrl(h.video_cover) || Pulse.DEFAULT_COVER;
             const title = h.video_title || '未知视频';
             const pct = h.duration > 0 ? Math.min(100, Math.round((h.progress / h.duration) * 100)) : 0;
             const completed = h.completed ? 'done' : '';

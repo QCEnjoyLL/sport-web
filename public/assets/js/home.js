@@ -233,7 +233,7 @@ function getFirstUncompletedVideoOfNextSeries(currentSeriesName, allVideos, seri
 }
 
 function renderNextCard(video, type) {
-  const cover = Pulse.safeUrl(video.cover) || Pulse.DEFAULT_COVER;
+  const cover = Pulse.getVideoCover(video);
   const title = video.title || '未知视频';
   let badgeHtml = '';
   let episodeHtml = '';
@@ -280,7 +280,7 @@ function renderContinue(videos) {
   strip.innerHTML = unfinished
     .map((v) => {
       const pct = v.duration ? Math.min(100, Math.round((v.last_progress / v.duration) * 100)) : 0;
-      const cover = Pulse.safeUrl(v.cover) || Pulse.DEFAULT_COVER;
+      const cover = Pulse.getVideoCover(v);
       return `
       <div class="video-card continue-card" data-id="${v.id}">
         <div class="video-thumb">

@@ -81,6 +81,7 @@ videos.get('/', async (c) => {
   const rows = await db
     .prepare(
       `SELECT v.*,
+              (SELECT cover FROM series WHERE name = v.series LIMIT 1) AS series_cover,
               (SELECT progress      FROM watch_history WHERE video_id = v.id ORDER BY last_watch_at DESC, id DESC LIMIT 1) AS last_progress,
               (SELECT completed    FROM watch_history WHERE video_id = v.id ORDER BY last_watch_at DESC, id DESC LIMIT 1) AS completed,
               (SELECT last_watch_at FROM watch_history WHERE video_id = v.id ORDER BY last_watch_at DESC, id DESC LIMIT 1) AS last_watched_at
@@ -98,6 +99,7 @@ videos.get('/', async (c) => {
     title: r.title,
     url: r.url,
     cover: r.cover,
+    series_cover: r.series_cover || '',
     description: r.description,
     duration: r.duration,
     sort_order: r.sort_order,
@@ -121,7 +123,10 @@ videos.get('/:id', async (c) => {
     return c.json({ error: '无效的视频 ID' }, 400);
   }
   const db = c.env.DB;
-  const v = await db.prepare(`SELECT * FROM videos WHERE id = ?`).bind(id).first();
+  const v = await db
+    .prepare(`SELECT v.*, (SELECT cover FROM series WHERE name = v.series LIMIT 1) AS series_cover FROM videos v WHERE v.id = ?`)
+    .bind(id)
+    .first();
   if (!v) return c.json({ error: '视频不存在' }, 404);
   const h = await db
     .prepare(
@@ -135,6 +140,7 @@ videos.get('/:id', async (c) => {
       title: v.title,
       url: v.url,
       cover: v.cover,
+      series_cover: v.series_cover || '',
       description: v.description,
       duration: v.duration,
       sort_order: v.sort_order,

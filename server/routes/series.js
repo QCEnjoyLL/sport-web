@@ -115,6 +115,7 @@ series.get('/:id', async (c) => {
     title: r.title,
     url: r.url,
     cover: r.cover,
+    series_cover: s.cover || '',
     description: r.description,
     duration: r.duration,
     sort_order: r.sort_order,

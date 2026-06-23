@@ -1,19 +1,6 @@
-/* 播放代理路由：302 重定向到 alist /d/ 代理 URL
-   核心策略：
-   - 调 /api/fs/get 获取最新 sign
-   - 构造 /d/路径?sign=xxx 代理 URL
-   - 直接 302 给浏览器，浏览器直连 alist 加载视频流
-   - 不经过 Workers 中转，速度最快，支持 Range（快进/边下边播）
-
-   为什么 302 而不是流式转发：
-   - 流式转发所有数据经过 Workers，大文件慢，Workers 有 CPU/带宽限制
-   - 302 让浏览器直连 alist → 115 CDN，2跳 vs 4跳，速度快数倍
-   - 浏览器直接处理 302 + Range，原生支持边下边播
-
-   alist /d/ 端点行为：
-   - 返回 302 到 115 CDN 的 raw_url
-   - 浏览器跟随 302 到 CDN，CDN 支持 Range（206），可边下边播
-   - 115 CDN 的签名 URL 在有效期内（约2小时）可被任意 IP 访问 */
+/* 播放路由：
+   - OpenList 链接：调 /api/fs/get 获取最新 sign，再 302 到 /d/ 代理 URL
+   - 普通视频直链：直接 302 给浏览器加载，不经过 Workers 中转 */
 import { Hono } from 'hono';
 import {
   getConfiguredAlistOrigin,
@@ -49,16 +36,19 @@ play.get('/:id', async (c) => {
     return c.json({ error: '视频链接仅支持 http(s)' }, 400);
   }
 
+  if (!VIDEO_URL_EXT.test(parsed.pathname)) {
+    return c.json({ error: '不支持的视频链接格式' }, 400);
+  }
+
   const configuredOrigin = getConfiguredAlistOrigin(c.env);
   if (configuredOrigin === '') {
     return c.json({ error: 'ALIST_BASE 配置不是有效 URL' }, 500);
   }
-  if (configuredOrigin && parsed.origin !== configuredOrigin) {
-    return c.json({ error: '视频链接不属于已配置的 ALIST_BASE' }, 400);
-  }
 
-  if (!VIDEO_URL_EXT.test(parsed.pathname)) {
-    return c.json({ error: '不支持的视频链接格式' }, 400);
+  /* 非 OpenList 域名的 http(s) 视频直链直接播放。
+     只有匹配 ALIST_BASE 的链接才需要刷新 OpenList sign。 */
+  if (!configuredOrigin || parsed.origin !== configuredOrigin) {
+    return c.redirect(rawInputUrl);
   }
 
   const alistBase = `${parsed.protocol}//${parsed.host}`;
@@ -79,7 +69,7 @@ play.get('/:id', async (c) => {
     try {
       reqBody.password = await decryptSecret(v.alist_password, c.env.SESSION_SECRET);
     } catch {
-      return c.json({ error: 'alist 目录密码解密失败，请在管理页重新保存密码' }, 500);
+      return c.json({ error: 'OpenList 目录密码解密失败，请在管理页重新保存密码' }, 500);
     }
   }
 
@@ -87,7 +77,7 @@ play.get('/:id', async (c) => {
   try {
     const apiResp = await postAlistJson(alistBase, '/api/fs/get', c.env, reqBody);
     if (!apiResp.ok) {
-      return c.json({ error: `alist API 请求失败 (${apiResp.status})` }, 502);
+      return c.json({ error: `OpenList API 请求失败 (${apiResp.status})` }, 502);
     }
 
     const data = apiResp.data;
@@ -96,7 +86,7 @@ play.get('/:id', async (c) => {
     } else {
       return c.json(
         {
-          error: `alist API 错误：${data?.message || '未知'}`,
+          error: `OpenList API 错误：${data?.message || '未知'}`,
           code: data?.code,
           hint: !alistToken
             ? '未配置 ALIST_TOKEN'
@@ -110,12 +100,12 @@ play.get('/:id', async (c) => {
       );
     }
   } catch (e) {
-    return c.json({ error: `无法连接 alist：${e.message}` }, 502);
+    return c.json({ error: `无法连接 OpenList：${e.message}` }, 502);
   }
 
   /* 构造 /d/ 代理 URL 并 302 重定向
-     浏览器直接从 alist 加载视频流，不经过 Workers 中转
-     - alist /d/ 返回 302 到 115 CDN raw_url
+     浏览器直接从 OpenList 加载视频流，不经过 Workers 中转
+     - OpenList /d/ 返回 302 到真实视频地址
      - 浏览器跟随 302 到 CDN，CDN 支持 Range（206），可边下边播
      - video 标签不受 CORS 限制，可直接加载跨域资源 */
   const cleanPath = alistPath.replace(/^\/+/, '');

@@ -86,7 +86,7 @@
         <div class="empty-state">
           <div class="empty-state-icon"><i class="fa-solid fa-dumbbell"></i></div>
           <h3>训练库还是空的</h3>
-          <p>点击"添加视频"，把你的 openlist 直链填进来。需要标题、视频链接，可选封面图。</p>
+          <p>点击"添加视频"，填入 OpenList 或其它可播放的视频直链。需要标题、视频链接，可选封面图。</p>
           <button class="btn btn-primary" id="firstAddBtn">
             <i class="fa-solid fa-plus"></i> 添加第一个视频
           </button>
@@ -634,9 +634,9 @@ function openModal(video, allVideos) {
           <input class="form-input" name="title" value="${Pulse.escapeHtml(v.title)}" placeholder="如：全身燃脂 20 分钟" required maxlength="200" />
         </div>
         <div class="form-group">
-          <label class="form-label">视频链接（alist 路径或直链）<span class="req">*</span></label>
-          <input class="form-input" name="url" value="${Pulse.escapeHtml(v.url)}" placeholder="https://alist.xxx.com/云盘/视频.mp4" required type="url" />
-          <div class="form-hint">填 alist 网页路径即可，后端会自动转直链</div>
+          <label class="form-label">视频直链<span class="req">*</span></label>
+          <input class="form-input" name="url" value="${Pulse.escapeHtml(v.url)}" placeholder="https://openlist.example.com/d/训练/视频.mp4 或 https://cdn.example.com/video.mp4" required type="url" />
+          <div class="form-hint">OpenList 链接会自动刷新签名；其它 http(s) 视频直链会直接播放。</div>
         </div>
         <div class="form-group">
           <label class="form-label">封面图链接</label>
@@ -644,9 +644,9 @@ function openModal(video, allVideos) {
           <div class="cover-preview empty" id="coverPreview"></div>
         </div>
         <div class="form-group">
-          <label class="form-label">alist 目录访问密码</label>
+          <label class="form-label">OpenList 目录访问密码</label>
           <input class="form-input" name="alist_password" value="" placeholder="${isEdit && v.has_password ? '已保存，留空保持不变，输入新值则覆盖' : '目录设了密码才填（可留空）'}" maxlength="200" />
-          <div class="form-hint">仅当 alist 目录设了访问密码时填写。需要账号登录的资源请配 ALIST_TOKEN 环境变量。</div>
+          <div class="form-hint">仅当 OpenList 目录设了访问密码时填写。普通视频直链不需要此项；需要账号登录的 OpenList 资源请配 ALIST_TOKEN 环境变量。</div>
         </div>
         <div class="form-group" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
           <div>
@@ -771,7 +771,7 @@ function openBatchAddModal() {
     <div class="modal-body">
       <div style="display:flex;gap:10px;margin-bottom:16px;align-items:flex-end;flex-wrap:wrap">
         <div class="form-group" style="flex:1;min-width:200px;margin:0">
-          <label class="form-label">alist 目录路径</label>
+          <label class="form-label">OpenList 目录路径</label>
           <input class="form-input" id="batchPath" value="/" placeholder="例：/视频/训练" />
         </div>
         <div class="form-group" style="flex:1;min-width:150px;margin:0">

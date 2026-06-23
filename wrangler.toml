@@ -1,0 +1,8 @@
+name = "sport-web"
+compatibility_date = "2025-06-01"
+pages_build_output_dir = "public"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "sport-db"
+database_id = "30e3bb67-f801-401c-99e7-1258e95e79ff"

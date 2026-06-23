@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PULSE 每日训练</title>
+  <meta name="description" content="每日运动训练视频跟练" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/components.css" />
+  <link rel="stylesheet" href="/assets/css/fontawesome-6.5.1-local.css" />
+  <link rel="stylesheet" href="/assets/css/home.css" />
+</head>
+<body>
+  <div id="nav"></div>
+
+  <main>
+    <!-- Hero -->
+    <section class="hero">
+      <div class="container">
+        <div class="hero-grid">
+          <div class="fade-up">
+            <span class="hero-tag"><span class="dot"></span> DAILY TRAINING</span>
+            <h1 class="hero-title">每一天<br/>更强一点的<span class="accent">自己</span></h1>
+            <p class="hero-sub">跟着视频，把训练变成习惯。打开即练，自动记录，跨设备同步你的每一次坚持。</p>
+            <div class="hero-cta">
+              <a href="/admin.html" class="btn btn-ghost"><i class="fa-solid fa-sliders"></i> 管理视频</a>
+              <a href="/history.html" class="btn btn-ghost"><i class="fa-solid fa-chart-line"></i> 训练记录</a>
+            </div>
+          </div>
+          <div class="today-card fade-up" id="todayBox" style="animation-delay:0.1s">
+            <!-- 由 home.js 注入 -->
+            <div class="today-label">今日状态</div>
+            <div class="today-headline idle">加载中...</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 今日训练计划 -->
+    <section class="section" id="nextSection" style="display:none;padding-top:24px">
+      <div class="container">
+        <div class="section-head">
+          <h2 class="section-title"><span class="bar"></span>训练记录 <small>上次完成 · 接着练</small></h2>
+        </div>
+        <div class="next-up-grid" id="nextGrid"></div>
+      </div>
+    </section>
+
+    <!-- 继续观看 -->
+    <section class="section" id="continueSection" style="display:none;padding-top:24px">
+      <div class="container">
+        <div class="section-head">
+          <h2 class="section-title"><span class="bar"></span>继续观看 <small>接着上次没练完的</small></h2>
+        </div>
+        <div class="continue-strip" id="continueStrip"></div>
+      </div>
+    </section>
+
+    <!-- 训练库 -->
+    <section class="section" style="padding-top:32px">
+      <div class="container">
+        <div class="section-head">
+          <h2 class="section-title"><span class="bar"></span>训练库 <small id="videoCount"></small></h2>
+        </div>
+        <div class="home-grid" id="videoGrid"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/assets/js/utils.js"></script>
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/home.js"></script>
+</body>
+</html>

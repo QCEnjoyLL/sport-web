@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>登录 · PULSE 每日训练</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/components.css" />
+  <link rel="stylesheet" href="/assets/css/fontawesome-6.5.1-local.css" />
+  <link rel="stylesheet" href="/assets/css/login.css" />
+</head>
+<body>
+  <div class="login-page">
+    <div class="login-card">
+      <div class="login-logo">
+        <img src="/assets/img/logo.svg" alt="PULSE" />
+      </div>
+      <h1 class="login-tagline">PULSE <span class="accent">每日训练</span></h1>
+      <p class="login-sub">输入密码，开启今日训练</p>
+
+      <div class="login-error" id="loginError">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span id="loginErrorMsg">密码错误</span>
+      </div>
+
+      <form class="login-form" id="loginForm" autocomplete="on">
+        <div class="form-group">
+          <label class="form-label" for="password">访问密码<span class="req">*</span></label>
+          <div class="password-field">
+            <input
+              type="password"
+              id="password"
+              class="form-input"
+              placeholder="请输入密码"
+              autocomplete="current-password"
+              required
+            />
+            <i class="fa-solid fa-eye toggle-eye" id="toggleEye"></i>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary login-btn" id="loginBtn">
+          <span class="btn-text"><i class="fa-solid fa-bolt"></i> 进入训练</span>
+          <span class="spinner"></span>
+        </button>
+      </form>
+
+      <div class="login-foot">PULSE · 每天更强一点</div>
+    </div>
+  </div>
+
+  <script src="/assets/js/utils.js"></script>
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/login.js"></script>
+</body>
+</html>

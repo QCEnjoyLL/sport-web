@@ -1,0 +1,27 @@
+{
+  "name": "sport-web",
+  "version": "1.0.0",
+  "description": "PULSE 每日训练 — 运动健身视频网站",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler pages dev public --local",
+    "db:init": "npm run db:migrate",
+    "db:init:remote": "npm run db:migrate:remote",
+    "db:migrate": "wrangler d1 migrations apply sport-db --local",
+    "db:migrate:remote": "wrangler d1 migrations apply sport-db --remote",
+    "db:create": "wrangler d1 create sport-db",
+    "check": "node scripts/check-js.mjs",
+    "test": "node --test",
+    "verify": "npm run check && npm test",
+    "deploy": "wrangler pages deploy public --project-name=sport-web",
+    "project:create": "wrangler pages project create sport-web"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "6.5.1",
+    "hono": "^4.6.14"
+  },
+  "devDependencies": {
+    "wrangler": "^3.114.17"
+  }
+}

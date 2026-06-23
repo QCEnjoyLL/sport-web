@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="referrer" content="no-referrer" />
+  <title>播放 · PULSE 每日训练</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/components.css" />
+  <link rel="stylesheet" href="/assets/css/fontawesome-6.5.1-local.css" />
+  <link rel="stylesheet" href="/assets/css/player.css?v=20260624" />
+</head>
+<body>
+  <div id="nav"></div>
+
+  <main class="player-page">
+    <div class="player-header">
+      <div class="container">
+        <a href="/index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> 返回</a>
+        <div class="breadcrumb">
+          <div class="breadcrumb-current" id="bcTitle">加载中...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container player-layout">
+      <div class="player-main">
+        <div class="player-wrap">
+          <div class="player-frame">
+            <video id="player" controls preload="metadata" playsinline></video>
+            <div class="resume-banner" id="resumeBanner">
+              <i class="fa-solid fa-forward"></i>
+              <span>从 <span class="resume-time" id="resumeTime">0:00</span> 继续</span>
+              <button id="resumeBtn">跳转</button>
+            </div>
+            <div class="player-loading" id="playerLoading">
+              <span class="spinner"></span> 加载视频中...
+            </div>
+          </div>
+        </div>
+
+        <div class="player-info">
+          <h1 class="player-title" id="videoTitle">—</h1>
+          <div class="player-meta" id="videoMeta"></div>
+          <div class="player-desc" id="videoDesc" style="display:none"></div>
+        </div>
+
+        <div class="player-nav" id="playerNav"></div>
+      </div>
+
+      <aside class="player-sidebar" id="playerSidebar" style="display:none">
+        <div class="sidebar-head">
+          <i class="fa-solid fa-layer-group"></i>
+          <span id="sidebarSeriesName">系列</span>
+        </div>
+        <div class="sidebar-list" id="sidebarList"></div>
+      </aside>
+    </div>
+  </main>
+
+  <script src="/assets/js/utils.js"></script>
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/player.js"></script>
+</body>
+</html>

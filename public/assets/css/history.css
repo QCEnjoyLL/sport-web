@@ -1,0 +1,388 @@
+/* ============================================================
+   history.css —— 训练记录时间线
+   ============================================================ */
+
+/* 顶部工具栏 */
+.history-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.history-month {
+  font-family: var(--font-display);
+  font-size: 26px;
+  letter-spacing: 1px;
+  min-width: 160px;
+  text-align: center;
+}
+
+/* 统计 */
+.history-stats {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+
+.history-stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 22px;
+  text-align: center;
+  min-width: 100px;
+}
+
+.history-stat-num {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--primary);
+}
+
+.history-stat-label {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+/* ---------- 日历 ---------- */
+.history-calendar {
+  max-width: 720px;
+  margin: 0 auto 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px 12px;
+}
+
+.cal-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-dim);
+  font-weight: 600;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+
+.cal-body {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.cal-cell {
+  aspect-ratio: 1 / 0.85;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+  position: relative;
+  transition: background 0.15s;
+  gap: 3px;
+}
+
+.cal-cell.empty {
+  visibility: hidden;
+}
+
+.cal-cell:not(.empty):hover {
+  background: var(--bg-alt);
+}
+
+.cal-cell.today {
+  border: 2px solid var(--primary);
+}
+
+.cal-cell.active {
+  background: rgba(255, 60, 60, 0.10);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+
+.cal-cell.has-record .cal-day-num {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.cal-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+
+.cal-cell.all-done .cal-dot {
+  background: var(--success);
+}
+
+.cal-cell.partial .cal-dot {
+  background: var(--warning, #f59e0b);
+}
+
+.cal-month-label {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+/* 时间线 */
+.history-timeline {
+  position: relative;
+  max-width: 720px;
+  margin: 0 auto;
+  padding-left: 28px;
+}
+
+.history-timeline::before {
+  content: '';
+  position: absolute;
+  left: 9px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--border);
+}
+
+.history-day {
+  position: relative;
+  margin-bottom: 32px;
+}
+
+.history-day-dot {
+  position: absolute;
+  left: -28px;
+  top: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.history-day-dot.done {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.history-day-dot.done::after {
+  content: '\f00c';
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  font-size: 9px;
+  color: #0a0a0a;
+}
+
+.history-day-date {
+  font-family: var(--font-display);
+  font-size: 18px;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.history-day-date .day-label {
+  font-size: 13px;
+  color: var(--text-dim);
+  font-family: var(--font-body);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.history-day-stats {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+  display: flex;
+  gap: 14px;
+}
+
+.history-day-stats .done-num {
+  color: var(--success);
+  font-weight: 600;
+}
+
+/* 每条记录 */
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  transition: border-color 0.2s, background 0.2s;
+  cursor: pointer;
+}
+
+.history-item:hover {
+  background: var(--bg-alt);
+  border-color: var(--border-strong);
+}
+
+.history-item:hover {
+  border-color: var(--border-strong);
+}
+
+.history-item-cover {
+  width: 48px;
+  height: 32px;
+  border-radius: 4px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--bg-alt);
+}
+
+.history-item-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.history-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.history-item-title {
+  font-size: 13px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.history-item-meta {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+.history-item-meta .done {
+  color: var(--success);
+}
+
+.history-item-actions {
+  flex-shrink: 0;
+}
+
+.history-item-actions .icon-btn.danger {
+  color: var(--danger);
+  opacity: 0.55;
+  transition: opacity 0.2s, background 0.2s;
+}
+
+.history-item:hover .icon-btn.danger {
+  opacity: 1;
+}
+
+.history-item-actions .icon-btn.danger:hover {
+  background: rgba(255, 68, 68, 0.12);
+}
+
+/* 空状态 */
+.history-empty {
+  padding: 4px 0;
+}
+
+/* 覆盖空状态默认的大内边距 */
+.history-empty .empty-state {
+  padding: 16px 16px 24px;
+}
+
+.history-empty .empty-state-icon {
+  width: 56px;
+  height: 56px;
+  font-size: 22px;
+  margin-bottom: 12px;
+}
+
+.history-empty .empty-state h3 {
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+
+.history-empty .empty-state p {
+  margin-bottom: 14px;
+}
+
+/* 无记录提示 */
+.history-no-record-tip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: var(--text-dim);
+  animation: slideDown 0.2s ease;
+}
+
+.history-no-record-tip i {
+  font-size: 18px;
+  color: var(--text-dim);
+}
+
+.history-no-record-tip .tip-close {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  transition: color 0.15s;
+}
+
+.history-no-record-tip .tip-close:hover {
+  color: var(--danger);
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* 响应式 */
+@media (max-width: 640px) {
+  .history-timeline {
+    padding-left: 22px;
+  }
+  .history-month {
+    font-size: 20px;
+    min-width: 120px;
+  }
+  .history-stat {
+    padding: 10px 14px;
+    min-width: 80px;
+  }
+  .history-stat-num {
+    font-size: 22px;
+  }
+  .history-item-actions .icon-btn.danger {
+    opacity: 1;
+  }
+}

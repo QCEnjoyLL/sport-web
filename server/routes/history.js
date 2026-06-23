@@ -1,5 +1,6 @@
 /* 观看记录路由：记录(upsert当日)、列表、月历统计 */
 import { Hono } from 'hono';
+import { isGuest } from '../middleware/auth.js';
 import {
   getClientDate,
   getClientMonthBoundsTs,
@@ -16,6 +17,9 @@ function getTimezoneOffset(c, body) {
 
 /* POST /api/history { video_id, progress, duration?, completed? } */
 history.post('/', async (c) => {
+  if (isGuest(c)) {
+    return c.json({ history: { id: null, progress: 0, completed: 0, guest: true } });
+  }
   let body;
   try {
     const raw = await c.req.text();
@@ -76,6 +80,9 @@ history.post('/', async (c) => {
 
 /* DELETE /api/history/:id —— 删除单条训练记录 */
 history.delete('/:id', async (c) => {
+  if (isGuest(c)) {
+    return c.json({ error: '访客模式无权执行此操作' }, 403);
+  }
   const id = Number(c.req.param('id'));
   if (!Number.isInteger(id) || id <= 0) {
     return c.json({ error: '无效的记录 ID' }, 400);
@@ -87,6 +94,9 @@ history.delete('/:id', async (c) => {
 
 /* GET /api/history?days=30&limit=200 */
 history.get('/', async (c) => {
+  if (isGuest(c)) {
+    return c.json({ history: [] });
+  }
   const days = Math.min(365, Math.max(1, Number(c.req.query('days')) || 30));
   const limit = Math.min(500, Math.max(1, Number(c.req.query('limit')) || 200));
   const since = Math.floor(Date.now() / 1000) - days * 86400;
@@ -134,6 +144,17 @@ history.get('/stats', async (c) => {
       year = y;
       month = m;
     }
+  }
+  if (isGuest(c)) {
+    return c.json({
+      month: `${year}-${String(month).padStart(2, '0')}`,
+      stats: [],
+      streak: 0,
+      month_days: new Date(year, month, 0).getDate(),
+      month_train_days: 0,
+      month_total_seconds: 0,
+      month_completed: 0,
+    });
   }
   /* 月份边界按客户端时区计算 */
   const { startTs, endTs } = getClientMonthBoundsTs(year, month, offsetMin);

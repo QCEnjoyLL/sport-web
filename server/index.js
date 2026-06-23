@@ -6,7 +6,7 @@ import historyRoutes from './routes/history.js';
 import playRoutes from './routes/play.js';
 import alistRoutes from './routes/alist.js';
 import seriesRoutes from './routes/series.js';
-import { authMiddleware } from './middleware/auth.js';
+import { adminOnly, authMiddleware } from './middleware/auth.js';
 
 const app = new Hono();
 
@@ -32,6 +32,13 @@ app.use('/api/history/*', authMiddleware);
 app.use('/api/play/*', authMiddleware);
 app.use('/api/alist/*', authMiddleware);
 app.use('/api/series/*', authMiddleware);
+
+app.post('/api/videos', adminOnly);
+app.put('/api/videos/*', adminOnly);
+app.delete('/api/videos/*', adminOnly);
+app.post('/api/videos/*', adminOnly);
+app.put('/api/series/*', adminOnly);
+app.use('/api/alist/*', adminOnly);
 
 app.route('/api/videos', videoRoutes);
 app.route('/api/history', historyRoutes);

@@ -1,7 +1,7 @@
 /* ============================================================
    Session Token：HMAC-SHA256 签名（Web Crypto，无外部依赖）
    格式：base64url(payload) + "." + base64url(hmac)
-   payload = JSON { exp }  （单用户，无需 uid）
+   payload = JSON { exp, role }
    ============================================================ */
 
 const COOKIE_NAME = 'session';
@@ -33,8 +33,8 @@ async function importKey(secret) {
   );
 }
 
-export async function signToken(exp, secret) {
-  const payload = b64urlEncode(new TextEncoder().encode(JSON.stringify({ exp })));
+export async function signToken(exp, secret, role = 'admin') {
+  const payload = b64urlEncode(new TextEncoder().encode(JSON.stringify({ exp, role })));
   const key = await importKey(secret);
   const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(payload));
   return `${payload}.${b64urlEncode(new Uint8Array(sig))}`;
@@ -63,6 +63,7 @@ export async function verifyToken(token, secret) {
     return null;
   }
   if (!data.exp || data.exp < Math.floor(Date.now() / 1000)) return null;
+  if (!data.role) data.role = 'admin';
   return data;
 }
 

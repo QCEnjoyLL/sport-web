@@ -15,3 +15,18 @@ export async function authMiddleware(c, next) {
   c.set('session', data);
   await next();
 }
+
+export function getSessionRole(c) {
+  return c.get('session')?.role || 'admin';
+}
+
+export function isGuest(c) {
+  return getSessionRole(c) === 'guest';
+}
+
+export async function adminOnly(c, next) {
+  if (isGuest(c)) {
+    return c.json({ error: '访客模式无权执行此操作' }, 403);
+  }
+  await next();
+}

@@ -1,5 +1,6 @@
 /* 视频路由：CRUD，列表/详情 JOIN 最新观看进度 */
 import { Hono } from 'hono';
+import { isGuest } from '../middleware/auth.js';
 import { encryptSecret } from '../utils/secret.js';
 
 const videos = new Hono();
@@ -78,6 +79,7 @@ function validateVideoInput(body, partial = false) {
    使用子查询而非 JOIN，彻底避免 watch_history 多条记录导致重复行 */
 videos.get('/', async (c) => {
   const db = c.env.DB;
+  const guest = isGuest(c);
   const rows = await db
     .prepare(
       `SELECT v.*,
@@ -97,7 +99,7 @@ videos.get('/', async (c) => {
   const list = (rows.results || []).map((r) => ({
     id: r.id,
     title: r.title,
-    url: r.url,
+    url: guest ? '' : r.url,
     cover: r.cover,
     series_cover: r.series_cover || '',
     description: r.description,
@@ -106,12 +108,12 @@ videos.get('/', async (c) => {
     series: r.series || '',
     episode: r.episode || 0,
     /* alist_password 不返回到列表，避免泄露；只在编辑时单独取 */
-    has_password: r.alist_password ? 1 : 0,
+    has_password: guest ? 0 : (r.alist_password ? 1 : 0),
     created_at: r.created_at,
     updated_at: r.updated_at,
-    last_progress: r.last_progress || 0,
-    completed: r.completed ? 1 : 0,
-    last_watched_at: r.last_watched_at || null,
+    last_progress: guest ? 0 : (r.last_progress || 0),
+    completed: guest ? 0 : (r.completed ? 1 : 0),
+    last_watched_at: guest ? null : (r.last_watched_at || null),
   }));
   return c.json({ videos: list });
 });
@@ -123,6 +125,7 @@ videos.get('/:id', async (c) => {
     return c.json({ error: '无效的视频 ID' }, 400);
   }
   const db = c.env.DB;
+  const guest = isGuest(c);
   const v = await db
     .prepare(`SELECT v.*, (SELECT cover FROM series WHERE name = v.series LIMIT 1) AS series_cover FROM videos v WHERE v.id = ?`)
     .bind(id)
@@ -138,7 +141,7 @@ videos.get('/:id', async (c) => {
     video: {
       id: v.id,
       title: v.title,
-      url: v.url,
+      url: guest ? '' : v.url,
       cover: v.cover,
       series_cover: v.series_cover || '',
       description: v.description,
@@ -147,11 +150,11 @@ videos.get('/:id', async (c) => {
       series: v.series || '',
       episode: v.episode || 0,
       /* alist_password 不在详情接口返回明文，编辑表单通过 has_password 判断是否已设置 */
-      has_password: v.alist_password ? 1 : 0,
+      has_password: guest ? 0 : (v.alist_password ? 1 : 0),
       created_at: v.created_at,
       updated_at: v.updated_at,
     },
-    history: h
+    history: guest ? null : h
       ? {
           progress: h.progress,
           completed: h.completed ? 1 : 0,

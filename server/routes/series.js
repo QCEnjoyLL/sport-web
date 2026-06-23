@@ -1,5 +1,6 @@
 /* 系列路由：列表、详情、编辑 */
 import { Hono } from 'hono';
+import { isGuest } from '../middleware/auth.js';
 
 const series = new Hono();
 
@@ -7,6 +8,7 @@ const series = new Hono();
    同时包含 videos 表中有 series 字段但在 series 表中无对应记录的系列 */
 series.get('/', async (c) => {
   const db = c.env.DB;
+  const guest = isGuest(c);
 
   /* 一次性补录所有孤儿系列（INSERT OR IGNORE 避免逐个插入和冲突） */
   const now = Math.floor(Date.now() / 1000);
@@ -62,7 +64,7 @@ series.get('/', async (c) => {
   }
 
   const list = (finalRows.results || []).map((r) => {
-    const p = progressMap.get(r.name) || { total: 0, completed: 0, in_progress: 0 };
+    const p = guest ? { total: 0, completed: 0, in_progress: 0 } : (progressMap.get(r.name) || { total: 0, completed: 0, in_progress: 0 });
     return {
       id: r.id,
       name: r.name,
@@ -87,6 +89,7 @@ series.get('/:id', async (c) => {
     return c.json({ error: '无效的系列 ID' }, 400);
   }
   const db = c.env.DB;
+  const guest = isGuest(c);
   const s = await db.prepare(`SELECT * FROM series WHERE id = ?`).bind(id).first();
   if (!s) return c.json({ error: '系列不存在' }, 404);
 
@@ -113,7 +116,7 @@ series.get('/:id', async (c) => {
   const episodes = (videoRows.results || []).map((r) => ({
     id: r.id,
     title: r.title,
-    url: r.url,
+    url: guest ? '' : r.url,
     cover: r.cover,
     series_cover: s.cover || '',
     description: r.description,
@@ -121,15 +124,15 @@ series.get('/:id', async (c) => {
     sort_order: r.sort_order,
     series: r.series || '',
     episode: r.episode || 0,
-    has_password: r.alist_password ? 1 : 0,
+    has_password: guest ? 0 : (r.alist_password ? 1 : 0),
     created_at: r.created_at,
     updated_at: r.updated_at,
-    last_progress: r.last_progress || 0,
-    completed: r.completed ? 1 : 0,
-    last_watched_at: r.last_watched_at || null,
+    last_progress: guest ? 0 : (r.last_progress || 0),
+    completed: guest ? 0 : (r.completed ? 1 : 0),
+    last_watched_at: guest ? null : (r.last_watched_at || null),
   }));
 
-  const completedCount = episodes.filter((e) => e.completed).length;
+  const completedCount = guest ? 0 : episodes.filter((e) => e.completed).length;
 
   return c.json({
     series: {

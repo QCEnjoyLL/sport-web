@@ -1,26 +1,47 @@
 /* 登录页逻辑 */
 (function () {
-  /* 已登录则跳转 */
-  api.auth
-    .status()
-    .then((r) => {
-      if (r && r.authenticated) goNext();
-    })
-    .catch(() => {});
-
   const form = document.getElementById('loginForm');
   const pwd = document.getElementById('password');
   const btn = document.getElementById('loginBtn');
   const errBox = document.getElementById('loginError');
   const errMsg = document.getElementById('loginErrorMsg');
   const eye = document.getElementById('toggleEye');
+  const guestHint = document.getElementById('guestHint');
+  const guestPasswordBtn = document.getElementById('guestPasswordBtn');
 
-  function goNext() {
+  function goNext(role) {
     const raw = Pulse.getQueryParam('next') || '/index.html';
     /* 防止 open redirect：只允许同站相对路径 */
-    const next = (raw.startsWith('/') && !raw.startsWith('//') && !raw.includes('\\\\')) ? raw : '/index.html';
+    let next = (raw.startsWith('/') && !raw.startsWith('//') && !raw.includes('\\\\')) ? raw : '/index.html';
+    if (role === 'guest' && next.startsWith('/admin.html')) next = '/index.html';
     window.location.href = next;
   }
+
+  function renderGuestHint(status) {
+    const guestPassword = status && status.guest_enabled ? status.guest_password : '';
+    if (!guestPassword || !guestHint || !guestPasswordBtn) return;
+    guestPasswordBtn.textContent = guestPassword;
+    guestHint.style.display = '';
+    guestPasswordBtn.onclick = () => {
+      pwd.value = guestPassword;
+      pwd.focus();
+    };
+  }
+
+  renderGuestHint({ guest_enabled: true, guest_password: 'guest' });
+
+  /* 已登录则跳转；未登录时用接口返回的配置覆盖默认访客密码 */
+  api.auth
+    .status()
+    .then((r) => {
+      if (r && r.authenticated) {
+        localStorage.setItem('pulse_role', r.role || 'admin');
+        goNext(r.role || 'admin');
+        return;
+      }
+      renderGuestHint(r);
+    })
+    .catch(() => {});
 
   function showError(msg) {
     errMsg.textContent = msg;
@@ -52,8 +73,9 @@
     btn.classList.add('loading');
     btn.disabled = true;
     try {
-      await api.auth.login(password);
-      goNext();
+      const r = await api.auth.login(password);
+      localStorage.setItem('pulse_role', r?.role || 'admin');
+      goNext(r?.role || 'admin');
     } catch (err) {
       showError(err.message || '登录失败');
       btn.classList.remove('loading');

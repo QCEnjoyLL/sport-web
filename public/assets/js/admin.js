@@ -1,7 +1,7 @@
 /* 管理页逻辑：视频 CRUD + 模态框 + 批量管理 + 排序 + 系列 */
 (async function () {
   renderNav('admin');
-  const ok = await requireAuth();
+  const ok = await requireAdmin();
   if (!ok) return;
 
   const list = $('#adminList');

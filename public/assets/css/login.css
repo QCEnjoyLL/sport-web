@@ -92,6 +92,41 @@
   margin-bottom: 20px;
 }
 
+.guest-hint {
+  margin: -14px 0 22px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-alt);
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.guest-hint-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text);
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.guest-hint button {
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  font: inherit;
+  font-weight: 700;
+  padding: 0;
+  cursor: pointer;
+}
+
+.guest-hint p {
+  margin: 4px 0 0;
+  color: var(--text-dim);
+}
+
 .password-field {
   position: relative;
 }

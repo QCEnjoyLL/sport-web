@@ -12,6 +12,7 @@ import {
 } from '../utils/token.js';
 
 const auth = new Hono();
+const DEFAULT_GUEST_PASSWORD = 'guest';
 
 /* 判断是否 https（生产 Cloudflare 一定是 https，本地 dev 是 http） */
 function isSecureReq(c) {
@@ -27,17 +28,26 @@ auth.get('/status', async (c) => {
   const token = parseCookie(cookie, COOKIE_NAME);
   const secret = c.env.SESSION_SECRET;
   let authenticated = false;
+  let role = null;
   if (token && secret) {
     const data = await verifyToken(token, secret);
     authenticated = !!data;
+    role = data?.role || null;
   }
-  return c.json({ authenticated });
+  const guestPassword = (c.env.GUEST_PASSWORD || DEFAULT_GUEST_PASSWORD).trim();
+  return c.json({
+    authenticated,
+    role,
+    guest_enabled: !!guestPassword,
+    guest_password: guestPassword,
+  });
 });
 
 /* POST /api/auth/login { password } */
 auth.post('/login', async (c) => {
   const secret = c.env.SESSION_SECRET;
   const adminPassword = c.env.ADMIN_PASSWORD;
+  const guestPassword = (c.env.GUEST_PASSWORD || DEFAULT_GUEST_PASSWORD).trim();
   if (!secret || !adminPassword) {
     return c.json({ error: '服务器未配置认证' }, 500);
   }
@@ -51,13 +61,19 @@ auth.post('/login', async (c) => {
   if (typeof password !== 'string' || password.length === 0) {
     return c.json({ error: '请输入密码' }, 400);
   }
-  if (!timingSafeEqual(password, adminPassword)) {
+  let role = null;
+  if (timingSafeEqual(password, adminPassword)) {
+    role = 'admin';
+  } else if (guestPassword && timingSafeEqual(password, guestPassword)) {
+    role = 'guest';
+  }
+  if (!role) {
     return c.json({ error: '密码错误' }, 401);
   }
   const exp = Math.floor(Date.now() / 1000) + SESSION_TTL;
-  const token = await signToken(exp, secret);
+  const token = await signToken(exp, secret, role);
   c.header('Set-Cookie', buildCookieHeader(token, isSecureReq(c), SESSION_TTL));
-  return c.json({ ok: true });
+  return c.json({ ok: true, role });
 });
 
 /* POST /api/auth/logout */

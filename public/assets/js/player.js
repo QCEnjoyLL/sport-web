@@ -21,6 +21,7 @@
   let videoData = null;
   let historyData = null;
   let pendingProgress = 0;
+  const guestMode = isGuestMode();
 
   /* 加载视频 + 全列表（用于上下导航） */
   try {
@@ -85,7 +86,7 @@
   video.addEventListener('loadedmetadata', () => {
     loading.classList.add('hide');
     const dur = Math.floor(video.duration || 0);
-    if (dur && dur !== videoData.duration) {
+    if (!guestMode && dur && dur !== videoData.duration) {
       /* 时长与库中不一致，静默更新 */
       api.videos.update(id, { duration: dur }).catch(() => {});
     }
@@ -144,6 +145,7 @@
   /* 页面卸载用 sendBeacon 保证送达（guard 防重复发送） */
   let flushed = false;
   const flush = () => {
+    if (guestMode) return;
     if (flushed) return;
     if (video.currentTime > 0) {
       flushed = true;
@@ -192,6 +194,7 @@
 
   /* ---------- 上报函数 ---------- */
   function reportProgress(forceCompleted) {
+    if (guestMode) return;
     pendingProgress = Math.floor(video.currentTime || 0);
     const dur = Math.floor(video.duration || 0);
     const completed = (forceCompleted || (dur > 0 && pendingProgress >= dur * 0.95)) ? 1 : 0;

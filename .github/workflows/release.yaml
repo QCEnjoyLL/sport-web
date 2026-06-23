@@ -1,0 +1,73 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry-run: build source archives but do not publish a GitHub Release"
+        required: false
+        default: true
+        type: boolean
+      tag:
+        description: "Tag to publish or simulate, for example v1.0.0"
+        required: false
+        type: string
+
+env:
+  IS_DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run == 'true' }}
+
+jobs:
+  publish-source:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Validate manual publish input
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run != 'true' && github.event.inputs.tag == '' }}
+        run: |
+          echo "::error::Manual publishing requires a tag, for example v1.0.0."
+          exit 1
+
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.inputs.tag || github.ref }}
+
+      - name: Set release tag
+        run: |
+          if [ -n "${{ github.event.inputs.tag }}" ]; then
+            echo "GIT_TAG=${{ github.event.inputs.tag }}" >> "$GITHUB_ENV"
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "GIT_TAG=dry-run-${GITHUB_SHA::7}" >> "$GITHUB_ENV"
+          else
+            echo "GIT_TAG=${GITHUB_REF_NAME}" >> "$GITHUB_ENV"
+          fi
+
+      - name: Create source archives
+        run: |
+          mkdir -p dist
+          git archive --format=zip --prefix="sport-web-${GIT_TAG}/" --output="dist/sport-web-${GIT_TAG}.zip" HEAD
+          git archive --format=tar --prefix="sport-web-${GIT_TAG}/" HEAD | gzip -9 > "dist/sport-web-${GIT_TAG}.tar.gz"
+          ls -lh dist
+
+      - name: Upload dry-run artifacts
+        if: ${{ env.IS_DRY_RUN == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: sport-web-source-${{ env.GIT_TAG }}
+          path: dist/*
+          if-no-files-found: error
+
+      - name: Publish GitHub Release
+        if: ${{ env.IS_DRY_RUN != 'true' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.GIT_TAG }}
+          name: ${{ env.GIT_TAG }}
+          files: dist/*
+          generate_release_notes: true
+          prerelease: ${{ contains(env.GIT_TAG, 'rc') || contains(env.GIT_TAG, 'beta') || contains(env.GIT_TAG, 'alpha') }}

@@ -14,7 +14,8 @@
     "check": "node scripts/check-js.mjs",
     "test": "node --test",
     "verify": "npm run check && npm test",
-    "deploy": "wrangler pages deploy public --project-name=sport-web",
+    "deploy": "wrangler pages deploy public --project-name=sport-web --branch production",
+    "deploy:preview": "wrangler pages deploy public --project-name=sport-web --branch main",
     "project:create": "wrangler pages project create sport-web"
   },
   "dependencies": {

@@ -12,6 +12,7 @@
     "db:migrate:remote": "wrangler d1 migrations apply sport-db --remote",
     "db:create": "wrangler d1 create sport-db",
     "check": "node scripts/check-js.mjs",
+    "covers": "node scripts/generate-covers.mjs",
     "test": "node --test",
     "verify": "npm run check && npm test",
     "deploy": "wrangler pages deploy public --project-name=sport-web --branch production",

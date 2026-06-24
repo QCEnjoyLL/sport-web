@@ -6,3 +6,5 @@ node_modules/
 .DS_Store
 .env
 .env.local
+cover-report*.json
+covers-report*.json

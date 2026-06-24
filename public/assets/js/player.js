@@ -167,9 +167,16 @@
 
   /* Keyboard shortcuts */
   const shortcutKeys = new Set([' ', 'Space', 'Spacebar', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']);
+  video.tabIndex = -1;
   window.addEventListener('keydown', handlePlayerShortcutKeyDown, { capture: true });
   window.addEventListener('keyup', handlePlayerShortcutKeyUp, { capture: true });
+  video.addEventListener('keydown', handlePlayerShortcutKeyDown, { capture: true });
+  video.addEventListener('keyup', handlePlayerShortcutKeyUp, { capture: true });
   video.addEventListener('pointerup', () => setTimeout(releaseNativeControlFocus, 0));
+  document.addEventListener('fullscreenchange', settleFullscreenFocus);
+  document.addEventListener('webkitfullscreenchange', settleFullscreenFocus);
+  video.addEventListener('webkitbeginfullscreen', settleFullscreenFocus);
+  video.addEventListener('webkitendfullscreen', settleFullscreenFocus);
 
   function handlePlayerShortcutKeyDown(e) {
     if (!isPlayerShortcut(e) || shouldIgnorePlayerShortcut(e)) return;
@@ -235,7 +242,24 @@
   }
 
   function releaseNativeControlFocus() {
-    if (document.activeElement === video) video.blur();
+    const active = document.activeElement;
+    if (active && active !== document.body && active !== document.documentElement && typeof active.blur === 'function') {
+      active.blur();
+    }
+    focusVideoForShortcuts();
+  }
+
+  function focusVideoForShortcuts() {
+    if (typeof video.focus !== 'function') return;
+    try {
+      video.focus({ preventScroll: true });
+    } catch (e) {
+      video.focus();
+    }
+  }
+
+  function settleFullscreenFocus() {
+    [0, 50, 150, 300].forEach((delay) => setTimeout(releaseNativeControlFocus, delay));
   }
 
   /* ---------- 上报函数 ---------- */

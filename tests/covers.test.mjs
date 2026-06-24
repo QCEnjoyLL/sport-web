@@ -6,6 +6,7 @@ import {
   chooseFrameSecond,
   matchLocalFiles,
   normalizeVideoName,
+  shouldGenerateCoverFile,
 } from '../scripts/generate-covers.mjs';
 
 test('normalizes local video names for matching', () => {
@@ -50,4 +51,10 @@ test('chooses a frame away from black intros when duration is known', () => {
   assert.equal(chooseFrameSecond(1556), 124.48);
   assert.equal(chooseFrameSecond(10), 3.5);
   assert.equal(chooseFrameSecond(100, 12), 12);
+});
+
+test('reuses existing local cover files unless regenerate is enabled', () => {
+  assert.equal(shouldGenerateCoverFile(false, { overwrite: true }), true);
+  assert.equal(shouldGenerateCoverFile(true, { overwrite: true }), false);
+  assert.equal(shouldGenerateCoverFile(true, { regenerate: true }), true);
 });

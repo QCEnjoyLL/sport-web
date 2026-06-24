@@ -1,6 +1,6 @@
 {
   "name": "sport-web",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "PULSE 每日训练 — 运动健身视频网站",
   "private": true,
   "type": "module",

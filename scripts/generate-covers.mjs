@@ -3,7 +3,6 @@ import { spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { access, mkdir, readdir, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 const VIDEO_EXT_RE = /\.(mp4|mkv|mov|m4v|webm)$/i;
 const DEFAULT_ORIGIN = 'http://localhost:8788';
@@ -72,7 +71,8 @@ Options:
   --generate           Generate cover images with ffmpeg.
   --write              Update matched video cover fields through the admin API.
   --dry-run            Match only. This is the default when neither --generate nor --write is set.
-  --overwrite          Include videos that already have a cover and regenerate/update them.
+  --overwrite          Include and update videos that already have a database cover.
+  --regenerate         Recreate existing local cover files. This accesses videos again.
   --fuzzy              Allow conservative contains-based matching when exact matching fails.
   --out <dir>          Output dir. Defaults to public/assets/covers/generated.
   --at <seconds>       Fixed screenshot timestamp. Default picks a useful point automatically.
@@ -96,6 +96,7 @@ export function parseArgs(argv) {
     write: false,
     dryRun: false,
     overwrite: false,
+    regenerate: false,
     fuzzy: false,
     recursive: true,
     at: null,
@@ -125,6 +126,7 @@ export function parseArgs(argv) {
       case '--write': opts.write = true; break;
       case '--dry-run': opts.dryRun = true; break;
       case '--overwrite': opts.overwrite = true; break;
+      case '--regenerate': opts.regenerate = true; break;
       case '--fuzzy': opts.fuzzy = true; break;
       case '--no-recursive': opts.recursive = false; break;
       case '--at': opts.at = Number(next()); break;
@@ -184,6 +186,10 @@ function candidateScore(fileKey, video, fuzzy) {
     }
   }
   return { score: 0, by: '' };
+}
+
+export function shouldGenerateCoverFile(exists, options = {}) {
+  return !exists || !!options.regenerate;
 }
 
 export function matchLocalFiles(files, videos, options = {}) {
@@ -397,6 +403,7 @@ export async function run(argv = process.argv.slice(2)) {
     generate: opts.generate,
     write: opts.write,
     overwrite: opts.overwrite,
+    regenerate: opts.regenerate,
     fuzzy: opts.fuzzy,
     localCount: files.length,
     remoteCount: videos.length,
@@ -425,14 +432,18 @@ export async function run(argv = process.argv.slice(2)) {
   let generated = 0;
   let updated = 0;
   let missingGenerated = 0;
+  let reused = 0;
 
   for (const match of limitedMatches) {
     if (opts.generate) {
       const exists = await fileExists(match.outputFile);
-      if (!exists || opts.overwrite) {
+      if (shouldGenerateCoverFile(exists, opts)) {
         console.log(`Generating #${match.video.id}: ${match.coverUrl}`);
         await generateCover(match.file.path, match.outputFile, opts);
         generated += 1;
+      } else {
+        reused += 1;
+        console.log(`Reusing existing cover #${match.video.id}: ${match.coverUrl}`);
       }
     }
 
@@ -452,14 +463,14 @@ export async function run(argv = process.argv.slice(2)) {
     }
   }
 
-  console.log(`\nDone. Generated: ${generated}, updated: ${updated}, missing cover files: ${missingGenerated}.`);
+  console.log(`\nDone. Generated: ${generated}, reused: ${reused}, updated: ${updated}, missing cover files: ${missingGenerated}.`);
   if (generated > 0) {
     console.log('Generated cover files are under public/. Commit them and deploy before relying on the imported cover URLs in production.');
   }
-  return { ok: true, report, generated, updated, missingGenerated };
+  return { ok: true, report, generated, reused, updated, missingGenerated };
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (process.argv[1] && path.basename(process.argv[1]) === 'generate-covers.mjs') {
   run().catch((err) => {
     console.error(err.message || err);
     process.exit(1);

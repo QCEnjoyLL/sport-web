@@ -264,6 +264,11 @@
     }
   }
 
+  function getWatchedSeconds(record) {
+    if (record.completed) return record.duration || record.progress || 0;
+    return record.progress || 0;
+  }
+
   function renderStats(d) {
     d = d || {};
     statDays.textContent = d.month_train_days || 0;
@@ -290,7 +295,7 @@
       }
       const grp = map[key];
       grp.items.push(h);
-      grp.totalSeconds += h.duration || h.progress || 0;
+      grp.totalSeconds += getWatchedSeconds(h);
       if (h.completed) grp.completed += 1;
     }
 

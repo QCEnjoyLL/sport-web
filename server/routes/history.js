@@ -15,6 +15,11 @@ function getTimezoneOffset(c, body) {
   return resolveTimezoneOffset(c.req.header('x-timezone-offset'), body);
 }
 
+function getWatchedSeconds(record) {
+  if (record.completed) return record.duration || record.progress || 0;
+  return record.progress || 0;
+}
+
 /* POST /api/history { video_id, progress, duration?, completed? } */
 history.post('/', async (c) => {
   if (isGuest(c)) {
@@ -186,11 +191,11 @@ history.get('/stats', async (c) => {
       duration: r.duration,
     });
   }
-  /* total_seconds：每条用 duration 优先，否则 progress 估算 */
+  /* total_seconds：已完成按视频时长，未完成按实际观看进度 */
   for (const k of Object.keys(byDate)) {
     let s = 0;
     for (const v of byDate[k].videos) {
-      s += v.duration || v.progress || 0;
+      s += getWatchedSeconds(v);
     }
     byDate[k].total_seconds = s;
   }

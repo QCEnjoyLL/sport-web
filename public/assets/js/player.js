@@ -165,32 +165,78 @@
     if (document.visibilityState === 'hidden') flush();
   });
 
-  /* 快捷键 */
-  document.addEventListener('keydown', (e) => {
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  /* Keyboard shortcuts */
+  const shortcutKeys = new Set([' ', 'Space', 'Spacebar', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']);
+  window.addEventListener('keydown', handlePlayerShortcutKeyDown, { capture: true });
+  window.addEventListener('keyup', handlePlayerShortcutKeyUp, { capture: true });
+  video.addEventListener('pointerup', () => setTimeout(releaseNativeControlFocus, 0));
+
+  function handlePlayerShortcutKeyDown(e) {
+    if (!isPlayerShortcut(e) || shouldIgnorePlayerShortcut(e)) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    releaseNativeControlFocus();
+
     switch (e.key) {
       case ' ':
-        e.preventDefault();
-        video.paused ? video.play() : video.pause();
+      case 'Space':
+      case 'Spacebar':
+        if (!e.repeat) togglePlayback();
         break;
       case 'ArrowLeft':
-        e.preventDefault();
-        video.currentTime = Math.max(0, video.currentTime - 5);
+        seekBy(-5);
         break;
       case 'ArrowRight':
-        e.preventDefault();
-        video.currentTime = Math.min(video.duration || 0, video.currentTime + 5);
+        seekBy(5);
         break;
       case 'ArrowUp':
-        e.preventDefault();
         video.volume = Math.min(1, Math.round((video.volume + 0.1) * 10) / 10);
         break;
       case 'ArrowDown':
-        e.preventDefault();
         video.volume = Math.max(0, Math.round((video.volume - 0.1) * 10) / 10);
         break;
     }
-  });
+  }
+
+  function handlePlayerShortcutKeyUp(e) {
+    if (!isPlayerShortcut(e) || shouldIgnorePlayerShortcut(e)) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    releaseNativeControlFocus();
+  }
+
+  function isPlayerShortcut(e) {
+    if (e.altKey || e.ctrlKey || e.metaKey) return false;
+    return shortcutKeys.has(e.key) || e.code === 'Space';
+  }
+
+  function shouldIgnorePlayerShortcut(e) {
+    return isTextEntry(e.target) || isTextEntry(document.activeElement);
+  }
+
+  function isTextEntry(target) {
+    if (!target || target === document || target === window) return false;
+    const tag = target.tagName;
+    return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || target.isContentEditable;
+  }
+
+  function togglePlayback() {
+    if (video.paused || video.ended) {
+      video.play().catch(() => {});
+    } else {
+      video.pause();
+    }
+  }
+
+  function seekBy(seconds) {
+    const duration = Number.isFinite(video.duration) && video.duration > 0 ? video.duration : null;
+    const nextTime = video.currentTime + seconds;
+    video.currentTime = duration ? Math.min(duration, Math.max(0, nextTime)) : Math.max(0, nextTime);
+  }
+
+  function releaseNativeControlFocus() {
+    if (document.activeElement === video) video.blur();
+  }
 
   /* ---------- 上报函数 ---------- */
   function reportProgress(forceCompleted) {
